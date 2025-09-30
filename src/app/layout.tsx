@@ -1,7 +1,7 @@
 import "./globals.css";
 import Link from "next/link";
 
-export const metadata = { title: process.env.STORE_NAME ?? "Checlo Chick" };
+export const metadata = { title: process.env.STORE_NAME ?? "Chelochick" };
 
 export default function RootLayout({ children}:{children:React.ReactNode}) {
   return (
@@ -10,7 +10,7 @@ export default function RootLayout({ children}:{children:React.ReactNode}) {
         <header className="border-b">
           <div className="container py-4 flex items-center justify-between">
             <Link href="/" className="font-semibold">
-              {process.env.STORE_NAME ?? "Checlo Chick"}
+              {process.env.STORE_NAME ?? "Chelochick"}
             </Link>
             <nav className="flex gap-4 text-sm">
               <Link href="/menu">Menu</Link>
@@ -21,7 +21,7 @@ export default function RootLayout({ children}:{children:React.ReactNode}) {
         </header>
         <main className="container py-6">{children}</main>
         <footer className="container py-10 text-sm text-gray-500">
-          © {new Date().getFullYear()} Checlo Chick
+          © {new Date().getFullYear()} Chelochick
         </footer>
       </body>
     </html>
