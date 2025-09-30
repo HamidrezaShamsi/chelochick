@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+enum OrderStatus {
+  pending
+  in_kitchen
+  ready_for_pickup
+  completed
+  cancelled
+  refunded
+}
+model MenuCategory {
+  id        String     @id @default(cuid())
+  name      String
+  sortOrder Int        @default(0)
+  items     MenuItem[]
+}
+model MenuItem {
+  id           String       @id @default(cuid())
+  name         String
+  description  String?
+  priceCents   Int
+  imageUrl     String?
+  isAvailable  Boolean      @default(true)
+  categoryId   String
+  category     MenuCategory @relation(fields: [categoryId], references: [id])
+}
+model Order {
+  id            String       @id @default(cuid())
+  code          String       @unique
+  customerName  String
+  customerPhone String
+  status        OrderStatus  @default(pending)
+  pickupSlot    DateTime
+  subtotalCents Int
+  taxCents      Int
+  tipCents      Int          @default(0)
+  totalCents    Int
+  createdAt     DateTime     @default(now())
+  items         OrderItem[]
+  payment       Payment?
+}
+model OrderItem {
+  id            String  @id @default(cuid())
+  orderId       String
+  order         Order   @relation(fields: [orderId], references: [id])
+  menuItemId    String
+  name          String
+  unitPriceCents Int
+  quantity      Int
+  notes         String?
+}
+model Payment {
+  id              String   @id @default(cuid())
+  orderId         String   @unique
+  order           Order    @relation(fields: [orderId], references: [id])
+  provider        String   @default("stripe")
+  paymentIntentId String   @unique
+  status          String
+  amountCents     Int
+  currency        String   @default("CAD")
+  raw             Json
+  createdAt       DateTime @default(now())
+}

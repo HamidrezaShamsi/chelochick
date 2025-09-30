@@ -1,0 +1,17 @@
+@'
+node_modules/
+.next/
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+*.crt
+*.pfx
+dev.db
+*.sqlite
+*.sqlite-journal
+.prisma/**
+!prisma/migrations/**   # keep migrations, ignore generated stuff
+'@ | Set-Content .gitignore -Encoding utf8
