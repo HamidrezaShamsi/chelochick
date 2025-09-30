@@ -11,6 +11,8 @@ export default function Page(){
         </div>
       </div>
       <div className="card">Fast MVP, delivery-ready later.</div>
+      <div className="bg-blue-500 text-white p-4 rounded-lg shadow-lg">Tailwind is working properly now!</div>
+
     </section>
   );
 }
