@@ -10,12 +10,18 @@ export default function CheckoutPage(){
   const [clientSecret,setClientSecret]=useState<string|null>(null);
   const [orderId,setOrderId]=useState<string|null>(null);
   const [name,setName]=useState(""); const [phone,setPhone]=useState(""); const [pickup,setPickup]=useState<string>("");
+  const [newsletter,setNewsletter] = useState(true);
   const subtotal = useMemo(()=> items.reduce((s,i)=>s + i.priceCents*i.quantity,0),[items]);
   async function start(){
     if(!items.length) return alert("Your cart is empty.");
     if(!name || !phone) return alert("Enter name & phone.");
     const res = await fetch("/api/checkout/start",{ method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ items, name, phone, pickup })});
     const data = await res.json();
+    await fetch("/api/newsletter/subscribe", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ email: phone ? undefined : undefined, source: "checkout" }) // if you also collect email here later, pass it.
+    });
     setClientSecret(data.client_secret); setOrderId(data.orderId);
   }
   return (
@@ -34,6 +40,10 @@ export default function CheckoutPage(){
           <input placeholder="Your name" className="w-full border rounded p-2" value={name} onChange={e=>setName(e.target.value)} />
           <input placeholder="Phone" className="w-full border rounded p-2" value={phone} onChange={e=>setPhone(e.target.value)} />
           <input placeholder="Pickup time (ISO, optional)" className="w-full border rounded p-2" value={pickup} onChange={e=>setPickup(e.target.value)} />
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={newsletter} onChange={e=>setNewsletter(e.target.checked)} />
+            Subscribe to our newsletter
+          </label>
           <button className="btn btn-primary w-full" onClick={start}>Start payment</button>
         </div>
       </div>

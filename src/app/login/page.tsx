@@ -1,0 +1,1 @@
+﻿export default function Page(){ return <div className="card">Login (coming soon)</div>; }
