@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { fmt } from "@/lib/money";
-import { AddButton } from "./useClient";
+import { AddButton } from "@/components/AddButton";
 export const dynamic = "force-dynamic";
 export default async function MenuPage(){
   const categories = await prisma.menuCategory.findMany({

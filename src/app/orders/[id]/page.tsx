@@ -1,37 +1,19 @@
-"use client";
-import Link from "next/link";
-import { useCart } from "@/store/cart";
-import { useEffect } from "react";
+
+import { OrderDetails } from "./OrderDetails";
 
 async function getOrder(id: string) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/api/orders/${id}`, { cache: "no-store" });
+  if (!res.ok) {
+    // Handle error appropriately in a real app
+    // For now, we can throw an error to be caught by Next.js error boundary
+    throw new Error(`Failed to fetch order: ${res.statusText}`);
+  }
   return res.json();
 }
 
-export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = await params;
-  const order = await getOrder(resolvedParams.id);
-  const { clearAfterOrderId, clear, setClearAfterOrderId } = useCart();
+export default async function OrderPage({ params }: { params: { id: string } }) {
+  const order = await getOrder(params.id);
 
-  useEffect(() => {
-    // Check URL parameters for payment success
-    const searchParams = new URLSearchParams(window.location.search);
-    const status = searchParams.get('redirect_status');
-    
-    if (status === 'succeeded' && clearAfterOrderId === resolvedParams.id) {
-      clear();
-      setClearAfterOrderId(undefined);
-    }
-  }, [clearAfterOrderId, resolvedParams.id, clear, setClearAfterOrderId]);
-
-  return (
-    <div className="space-y-3">
-      <h2 className="text-2xl font-semibold">Order {order.code}</h2>
-      <div className="card">
-        <div>Status: <span className="font-semibold">{order.status}</span></div>
-        <div>Total: <span className="font-semibold">${(order.totalCents/100).toFixed(2)}</span></div>
-      </div>
-      <Link href="/menu" className="btn border">Back to menu</Link>
-    </div>
-  );
+  // The client component is rendered here with the server-fetched data
+  return <OrderDetails order={order} />;
 }

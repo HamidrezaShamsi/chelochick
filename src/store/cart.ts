@@ -25,6 +25,7 @@ type CartState = {
   update: (id: string, updates: Partial<CartItem>) => void;
   remove: (id: string) => Promise<boolean>;
   clear: () => Promise<boolean>;
+  clearCartForCheckout: () => void;
   saveForLater: (id: string) => void;
   moveToCart: (id: string) => void;
   setPickupTime: (time: Date) => void;
@@ -78,6 +79,7 @@ export const useCart = create<CartState>(
         }
         return confirmed;
       },
+      clearCartForCheckout: () => set({ items: [] }),
       saveForLater: (id) => set((state) => {
         const item = state.items.find(x => x.id === id);
         if (!item) return state;

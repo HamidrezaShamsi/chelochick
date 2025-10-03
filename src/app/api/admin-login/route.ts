@@ -1,10 +1,44 @@
-﻿import { cookies } from "next/headers";
+﻿import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
-export async function POST(req:Request){
-  const { password } = await req.json();
-  if (password && process.env.ADMIN_PASSWORD && password === process.env.ADMIN_PASSWORD) {
-    cookies().set("admin_auth", "1", { httpOnly:true, sameSite:"lax", secure:false, path:"/", maxAge:60*60*8 });
-    return Response.json({ ok:true });
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const { email, password, name, phone } = body ?? {};
+    
+    if (!email || !password || !name) {
+      return new Response("Missing required fields", { status: 400 });
+    }
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email: String(email) }
+    });
+
+    if (existingUser) {
+      return Response.json({ message: "User with this email already exists" }, { status: 400 });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(String(password), 12);
+
+    // Create user
+    const user = await prisma.user.create({
+      data: {
+        email: String(email),
+        password: hashedPassword,
+        name: String(name),
+        phone: phone ? String(phone) : null
+      }
+    });
+
+    return Response.json({ 
+      ok: true, 
+      user: { id: user.id, email: user.email, name: user.name } 
+    });
+
+  } catch (error: any) {
+    console.error("Registration error:", error);
+    return Response.json({ message: "Server error: " + error.message }, { status: 500 });
   }
-  return new Response("Unauthorized", { status:401 });
 }

@@ -1,10 +1,12 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
 enum OrderStatus {
   pending
   in_kitchen
@@ -13,47 +15,62 @@ enum OrderStatus {
   cancelled
   refunded
 }
+
 model MenuCategory {
   id        String     @id @default(cuid())
   name      String
   sortOrder Int        @default(0)
   items     MenuItem[]
 }
+
 model MenuItem {
-  id           String       @id @default(cuid())
-  name         String
-  description  String?
-  priceCents   Int
-  imageUrl     String?
-  isAvailable  Boolean      @default(true)
-  categoryId   String
-  category     MenuCategory @relation(fields: [categoryId], references: [id])
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  priceCents  Int
+  isAvailable Boolean  @default(true)
+  categoryId  String
+  createdAt   DateTime @default(now())
+
+  // Existing relations
+  category   MenuCategory @relation(fields: [categoryId], references: [id])
+  orderItems OrderItem[]
+
+  // Add this relation
+  favoriteByUsers UserFavorite[]
 }
+
 model Order {
-  id            String       @id @default(cuid())
-  code          String       @unique
+  id            String   @id @default(cuid())
+  code          String   @unique
   customerName  String
   customerPhone String
-  status        OrderStatus  @default(pending)
+  customerEmail String?
+  userId        String? // Add this field
   pickupSlot    DateTime
   subtotalCents Int
   taxCents      Int
-  tipCents      Int          @default(0)
   totalCents    Int
-  createdAt     DateTime     @default(now())
-  items         OrderItem[]
-  payment       Payment?
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
+
+  user     User?       @relation(fields: [userId], references: [id])
+  items    OrderItem[]
+  payments Payment[]
 }
+
 model OrderItem {
-  id            String  @id @default(cuid())
-  orderId       String
-  order         Order   @relation(fields: [orderId], references: [id])
-  menuItemId    String
-  name          String
+  id             String   @id @default(cuid())
+  orderId        String
+  order          Order    @relation(fields: [orderId], references: [id])
+  menuItemId     String
+  name           String
   unitPriceCents Int
-  quantity      Int
-  notes         String?
+  quantity       Int
+  notes          String?
+  MenuItem       MenuItem @relation(fields: [menuItemId], references: [id])
 }
+
 model Payment {
   id              String   @id @default(cuid())
   orderId         String   @unique
@@ -66,6 +83,7 @@ model Payment {
   raw             Json
   createdAt       DateTime @default(now())
 }
+
 model ContactMessage {
   id        String   @id @default(cuid())
   name      String
@@ -79,5 +97,30 @@ model NewsletterSubscriber {
   id        String   @id @default(cuid())
   email     String   @unique
   createdAt DateTime @default(now())
-  source    String?  // "contact" or "checkout"
+  source    String? // "contact" or "checkout"
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String   // hashed
+  name        String
+  phone       String?
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  orders      Order[]
+  favoriteItems UserFavorite[]
+}
+
+model UserFavorite {
+  id         String   @id @default(cuid())
+  userId     String
+  menuItemId String
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@unique([userId, menuItemId])
 }
