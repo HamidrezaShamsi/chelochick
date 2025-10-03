@@ -1,11 +1,14 @@
 import Link from "next/link";
 export const dynamic = "force-dynamic";
-async function getOrder(id:string){
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/api/orders/${id}`,{ cache:"no-store" });
+
+async function getOrder(id: string) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/api/orders/${id}`, { cache: "no-store" });
   return res.json();
 }
-export default async function OrderPage({ params }:{ params:{ id:string } }){
-  const order = await getOrder(params.id);
+
+export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  const order = await getOrder(resolvedParams.id);
   return (
     <div className="space-y-3">
       <h2 className="text-2xl font-semibold">Order {order.code}</h2>
