@@ -17,12 +17,17 @@ export default function CheckoutPage(){
     if(!name || !phone) return alert("Enter name & phone.");
     const res = await fetch("/api/checkout/start",{ method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ items, name, phone, pickup })});
     const data = await res.json();
-    await fetch("/api/newsletter/subscribe", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ email: phone ? undefined : undefined, source: "checkout" }) // if you also collect email here later, pass it.
-    });
     setClientSecret(data.client_secret); setOrderId(data.orderId);
+    if (newsletter) {
+      await fetch("/api/newsletter/subscribe", {
+        method: "POST", 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          email: phone, // Use phone as identifier since we don't collect email
+          source: "checkout"
+        })
+      });
+    }
   }
   return (
     <div className="grid md:grid-cols-2 gap-6">

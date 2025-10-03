@@ -79,5 +79,5 @@ model NewsletterSubscriber {
   id        String   @id @default(cuid())
   email     String   @unique
   createdAt DateTime @default(now())
-  source    String?  // "contact", "checkout"
+  source    String?  // "contact" or "checkout"
 }
